@@ -5,7 +5,6 @@ import Navbar from '@/components/Navbar';
 import { getSession } from '@/lib/auth';
 import Link from 'next/link';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import Script from 'next/script';
 
 const serifFont = Source_Serif_4({ subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-serif' });
 const sansFont = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -27,9 +26,8 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${serifFont.variable} ${sansFont.variable} ${monoFont.variable}`} suppressHydrationWarning>
       <head>
-        <Script
+        <script
           id="theme-init-script"
-          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
