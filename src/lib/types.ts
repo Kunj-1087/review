@@ -22,8 +22,8 @@ export interface AnonymousProfileSummary {
 
 export interface PostWithRelations extends Omit<Post, 'anonymousProfile' | 'college'> {
   anonymousProfile: AnonymousProfileSummary;
-  college?: { name: string; slug: string; city?: string } | College | null;
-  images?: PostImage[];
+  college?: { id?: string; name: string; slug: string; city?: string; streams?: string } | College | null;
+  images?: Array<{ id: string; imageUrl: string }> | PostImage[];
   rolesNeededParsed?: string[];
   skillsNeededParsed?: string[];
 }

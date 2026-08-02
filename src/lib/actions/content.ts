@@ -192,7 +192,7 @@ export async function getCollegeBySlugAction(slug: string) {
   });
 
   // Fetch public posts
-  const posts = await prisma.post.findMany({
+  const rawPosts = await prisma.post.findMany({
     where: { collegeId: college.id, isHidden: false },
     orderBy: { createdAt: 'desc' },
     include: {
@@ -203,7 +203,25 @@ export async function getCollegeBySlugAction(slug: string) {
           batchYear: true,
         },
       },
+      images: true,
     },
+  });
+
+  const posts = rawPosts.map((p) => {
+    let rolesNeededParsed: string[] = [];
+    let skillsNeededParsed: string[] = [];
+    try {
+      if (p.rolesNeeded) rolesNeededParsed = JSON.parse(p.rolesNeeded);
+    } catch {}
+    try {
+      if (p.skillsNeeded) skillsNeededParsed = JSON.parse(p.skillsNeeded);
+    } catch {}
+
+    return {
+      ...p,
+      rolesNeededParsed,
+      skillsNeededParsed,
+    };
   });
 
   const votes = await prisma.vote.findMany({
