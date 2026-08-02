@@ -1,0 +1,327 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// 1. IDENTITY DOMAIN (Sensitive PII)
+// ----------------------------------------------------
+
+model User {
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  verificationStatus String   @default("UNVERIFIED") // UNVERIFIED, PENDING, DOMAIN_VERIFIED, MANUALLY_VERIFIED
+  verifiedCollegeId  String?
+  role               String   @default("STUDENT") // STUDENT, MODERATOR, ADMIN
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  verificationRequests VerificationRequest[]
+  anonymousProfile     AnonymousProfile?
+}
+
+model OtpToken {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model VerificationRequest {
+  id         String    @id @default(cuid())
+  userId     String
+  collegeId  String
+  idCardUrl  String
+  status     String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedBy String?
+  notes      String?
+  reviewedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ----------------------------------------------------
+// 2. CONTENT DOMAIN (Anonymous Public Data)
+// ----------------------------------------------------
+
+model College {
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  city             String
+  streams          String   // JSON array e.g. ["Engineering","Management"]
+  affiliation      String   // e.g. GTU, Autonomous, Deemed Univ
+  officialDomains  String   // JSON array e.g. ["nirmauni.ac.in"]
+  domainConfidence String   @default("unconfirmed") // confirmed, likely, unconfirmed, none
+  type             String   // GOVERNMENT, PRIVATE, DEEMED
+  typeDetail       String?  // e.g. "Government (Municipal)", "Grant-in-Aid", "PPP", "Deemed"
+  establishedYear  Int?
+  formerNames      String?  // JSON array e.g. ["Old Name"]
+  sourceNotes      String?  // Notes from research doc
+  createdAt        DateTime @default(now())
+
+  reviews      Review[]
+  posts        Post[]
+  profiles     AnonymousProfile[]
+  anomalyFlags AnomalyFlag[]
+  collegeSummary CollegeSummary?
+
+  @@unique([name, city])
+}
+
+model AnonymousProfile {
+  id               String    @id @default(cuid())
+  userId           String    @unique // Internal bridge only! NEVER join to public content queries
+  publicHandle     String    @unique // e.g. "GTU_Geek_42", "Nirma_Coder_99"
+  batchYear        Int?
+  collegeId        String?
+  lastSubmissionAt DateTime? // Rate limiting cooldown tracker
+  createdAt        DateTime  @default(now())
+
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  college       College?        @relation(fields: [collegeId], references: [id], onDelete: SetNull)
+  reviews          Review[]
+  posts            Post[]
+  comments         Comment[]
+  votes            Vote[]
+  reports          Report[]
+  helpfulVotes     ReviewHelpful[]
+  notifications    Notification[]
+  connectRequests  ConnectRequest[]
+  connectMessages  ConnectMessage[]
+  blockedBy        ConnectBlock[]   @relation("BlockedProfiles")
+  blocking         ConnectBlock[]   @relation("BlockerProfiles")
+}
+
+model Review {
+  id                 String   @id @default(cuid())
+  anonymousProfileId String
+  collegeId          String
+
+  // Category Ratings (1 - 5)
+  academics      Int
+  placements     Int
+  infrastructure Int
+  hostel         Int
+  feesValue      Int
+  facultySupport Int
+  campusLife     Int
+  safety         Int
+
+  freeText     String
+  helpfulCount Int      @default(0)
+  isHidden     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  editedAt     DateTime @updatedAt
+
+  anonymousProfile AnonymousProfile @relation(fields: [anonymousProfileId], references: [id], onDelete: Cascade)
+  college          College          @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  helpfulVotes     ReviewHelpful[]
+
+  @@unique([anonymousProfileId, collegeId])
+}
+
+model ReviewHelpful {
+  id                 String   @id @default(cuid())
+  reviewId           String
+  anonymousProfileId String
+  createdAt          DateTime @default(now())
+
+  review           Review           @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  anonymousProfile AnonymousProfile @relation(fields: [anonymousProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([anonymousProfileId, reviewId])
+}
+
+model Post {
+  id                 String   @id @default(cuid())
+  anonymousProfileId String
+  collegeId          String
+  body               String
+  imageUrl           String?
+  postType           String   @default("GENERAL") // GENERAL, EVENT, TEAM_REQUEST
+  eventType          String?  // HACKATHON, FEST, WORKSHOP, SEMINAR, CULTURAL, SPORTS, OTHER
+  eventDate          DateTime?
+  visibilityScope    String   @default("OPEN_GUJARAT") // COLLEGE_ONLY, OPEN_GUJARAT
+  externalLink       String?
+  teamSizeNeeded     Int?
+  rolesNeeded        String?  // JSON string e.g. ["Frontend", "Backend"]
+  skillsNeeded       String?  // JSON string e.g. ["React", "Node.js"]
+  isHidden           Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  anonymousProfile AnonymousProfile @relation(fields: [anonymousProfileId], references: [id], onDelete: Cascade)
+  college          College          @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+  images           PostImage[]
+  connectRequests  ConnectRequest[]
+
+  @@index([visibilityScope, eventType, eventDate, collegeId])
+}
+
+model PostImage {
+  id         String   @id @default(cuid())
+  postId     String
+  imageUrl   String
+  uploadedAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+model ConnectRequest {
+  id                 String   @id @default(cuid())
+  postId             String
+  requesterProfileId String
+  message            String?
+  status             String   @default("PENDING") // PENDING, ACCEPTED, DECLINED
+  createdAt          DateTime @default(now())
+
+  post             Post             @relation(fields: [postId], references: [id], onDelete: Cascade)
+  requesterProfile AnonymousProfile @relation(fields: [requesterProfileId], references: [id], onDelete: Cascade)
+  thread           ConnectThread?
+
+  @@unique([postId, requesterProfileId])
+  @@index([requesterProfileId, createdAt])
+}
+
+model ConnectThread {
+  id               String   @id @default(cuid())
+  connectRequestId String   @unique
+  expiresAt        DateTime
+  status           String   @default("ACTIVE") // ACTIVE, EXPIRED, REPORTED
+  createdAt        DateTime @default(now())
+
+  connectRequest ConnectRequest   @relation(fields: [connectRequestId], references: [id], onDelete: Cascade)
+  messages       ConnectMessage[]
+
+  @@index([expiresAt, status])
+}
+
+model ConnectMessage {
+  id              String   @id @default(cuid())
+  threadId        String
+  senderProfileId String
+  body            String
+  createdAt       DateTime @default(now())
+
+  thread        ConnectThread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  senderProfile AnonymousProfile @relation(fields: [senderProfileId], references: [id], onDelete: Cascade)
+
+  @@index([threadId, createdAt])
+}
+
+model ConnectBlock {
+  id               String   @id @default(cuid())
+  blockerProfileId String
+  blockedProfileId String
+  createdAt        DateTime @default(now())
+
+  blockerProfile AnonymousProfile @relation("BlockerProfiles", fields: [blockerProfileId], references: [id], onDelete: Cascade)
+  blockedProfile AnonymousProfile @relation("BlockedProfiles", fields: [blockedProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerProfileId, blockedProfileId])
+}
+
+model Comment {
+  id                 String   @id @default(cuid())
+  parentType         String   // "POST" or "REVIEW"
+  parentId           String
+  anonymousProfileId String
+  body               String
+  isHidden           Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  anonymousProfile AnonymousProfile @relation(fields: [anonymousProfileId], references: [id], onDelete: Cascade)
+
+  @@index([parentType, parentId])
+}
+
+model Vote {
+  id                 String   @id @default(cuid())
+  anonymousProfileId String
+  targetType         String   // "POST", "REVIEW", "COMMENT"
+  targetId           String
+  direction          String   // "UP" or "DOWN"
+  createdAt          DateTime @default(now())
+
+  anonymousProfile AnonymousProfile @relation(fields: [anonymousProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([anonymousProfileId, targetType, targetId])
+}
+
+model Report {
+  id                 String   @id @default(cuid())
+  anonymousProfileId String
+  targetType         String   // "POST", "REVIEW", "COMMENT"
+  targetId           String
+  reason             String
+  status             String   @default("PENDING") // "PENDING", "ACTIONED", "DISMISSED"
+  createdAt          DateTime @default(now())
+
+  anonymousProfile  AnonymousProfile   @relation(fields: [anonymousProfileId], references: [id], onDelete: Cascade)
+  moderationActions ModerationAction[]
+}
+
+model ModerationAction {
+  id          String   @id @default(cuid())
+  reportId    String
+  moderatorId String   // User ID of moderator
+  action      String   // e.g. "HIDE_CONTENT", "DISMISS", "WARN"
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  report Report @relation(fields: [reportId], references: [id], onDelete: Cascade)
+}
+
+model AnomalyFlag {
+  id        String   @id @default(cuid())
+  collegeId String
+  reason    String   // e.g. "Burst of 4 reviews within 1h from newly-created accounts"
+  status    String   @default("PENDING") // PENDING, DISMISSED, RESOLVED
+  createdAt DateTime @default(now())
+
+  college College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  @@index([collegeId, status])
+}
+
+// ----------------------------------------------------
+// FEATURE 3: Auto-Generated Review Summaries
+// ----------------------------------------------------
+// Stores a derived pros/cons snapshot computed from real review text.
+// Generated only when review count crosses 10/25/50/100 thresholds.
+// Never generated for colleges below the 5-review public threshold.
+
+model CollegeSummary {
+  id            String   @id @default(cuid())
+  collegeId     String   @unique
+  pros          String   // JSON array of recurring positive theme strings
+  cons          String   // JSON array of recurring negative theme strings
+  generatedAt   DateTime @default(now())
+  atReviewCount Int      // The review count at time of (re)generation
+
+  college College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id                 String   @id @default(cuid())
+  anonymousProfileId String
+  type               String   // COMMENT_RECEIVED, THRESHOLD_UNLOCKED, MODERATION_ACTION
+  title              String
+  message            String
+  linkUrl            String?
+  isRead             Boolean  @default(false)
+  createdAt          DateTime @default(now())
+
+  anonymousProfile AnonymousProfile @relation(fields: [anonymousProfileId], references: [id], onDelete: Cascade)
+
+  @@index([anonymousProfileId, isRead])
+}
