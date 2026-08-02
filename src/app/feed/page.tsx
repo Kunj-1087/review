@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth';
 import PostCard from '@/components/PostCard';
 import CreatePostForm from '@/components/CreatePostForm';
 import EventFeedFilter from '@/components/EventFeedFilter';
+import { PostWithRelations } from '@/lib/types';
 import { MessageSquareText, Flame, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 
@@ -68,7 +69,7 @@ export default async function CampusFeedPage({
         </div>
       ) : (
         <div className="space-y-5">
-          {posts.map((post) => (
+          {(posts as PostWithRelations[]).map((post) => (
             <PostCard
               key={post.id}
               post={post}

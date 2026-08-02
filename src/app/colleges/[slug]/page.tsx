@@ -242,7 +242,7 @@ export default async function CollegeDetailPage({
                 No campus posts yet for this institution.
               </p>
             ) : (
-              college.posts.map((post: PostWithRelations) => (
+              (college.posts as PostWithRelations[]).map((post) => (
                 <PostCard
                   key={post.id}
                   post={post}

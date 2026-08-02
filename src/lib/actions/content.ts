@@ -3,7 +3,7 @@
 import { prisma } from '../prisma';
 import { getSession } from '../auth';
 import { sendNotification } from './notification';
-import { CATEGORY_WEIGHTS } from '../types';
+import { CATEGORY_WEIGHTS, PostWithRelations } from '../types';
 import { checkReviewQuality } from '../quality-flags';
 import { shouldRegenerateSummary, generateCollegeSummary } from '../summary';
 
@@ -255,7 +255,7 @@ export async function getCollegeBySlugAction(slug: string) {
     officialDomains,
     stats,
     reviews,
-    posts,
+    posts: posts as unknown as PostWithRelations[],
     votes,
     comments,
     collegeSummary,
@@ -887,7 +887,7 @@ export async function getAllPostsAction({
     },
   });
 
-  return { posts, votes, comments };
+  return { posts: posts as unknown as PostWithRelations[], votes, comments };
 }
 
 // STEP 6: Leaderboard & Trending Action
