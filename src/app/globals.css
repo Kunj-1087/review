@@ -1,97 +1,243 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Caveat:wght@400;600&family=Gloria+Hallelujah&display=swap');
 @import "tailwindcss";
 
 :root {
-  --color-bg-primary: #FAF9F5;
-  --color-bg-secondary: #F4F1EA;
-  --color-accent: #D97757;
-  --color-accent-hover: #BF6849;
-  --color-text-primary: #1F1E1D;
-  --color-text-secondary: #6B6558;
-  --color-border: #E5E1D8;
-  --color-verified: #4A7C59;
-  --color-warning: #B3492B;
-}
+  /* ==========================================================================
+     COLOR PALETTE TOKENS
+     ========================================================================== */
+  /* Backgrounds */
+  --background-primary: #050209;     /* Ultra-dark void background */
+  --background-secondary: #0b0713;   /* Deep midnight purple container */
+  /* Surfaces & Cards */
+  --surface-primary: #120921;        /* Dark violet surface card */
+  --surface-elevated: #1a0f30;       /* Elevated dark violet card */
+  /* Accents & Glows */
+  --accent-primary: #8b5cf6;         /* Electric Violet / Purple */
+  --accent-secondary: #c084fc;       /* Neon Lavender Violet */
+  --accent-soft: rgba(139, 92, 246, 0.15); /* Translucent accent background */
+  --accent-glow: rgba(139, 92, 246, 0.3);  /* Glow effect aura */
+  /* Text Colors */
+  --text-primary: #f9f9fb;           /* Crisp off-white heading/primary text */
+  --text-secondary: #b3aeca;         /* Muted lavender-gray body text */
+  --text-muted: #6b6485;             /* Deep slate lavender for captions/subtext */
+  /* Borders & Dividers */
+  --border-primary: rgba(139, 92, 246, 0.2);
+  --border-active: rgba(192, 132, 252, 0.5);
+  /* Status & Interactive */
+  --focus-ring: #c084fc;
+  --error: #f87171;
+  --success: #34d399;
+  /* Accent Highlight (Alternative Green Accent) */
+  --accent-neon-green: #39FF14;
 
-.dark {
-  --color-bg-primary: #262624;
-  --color-bg-secondary: #30302E;
-  --color-accent: #E0876A;
-  --color-accent-hover: #EDA089;
-  --color-text-primary: #F2F0E9;
-  --color-text-secondary: #A8A296;
-  --color-border: #45443F;
-  --color-verified: #6FA97F;
-  --color-warning: #D2694A;
+  /* Legacy & compatibility aliases */
+  --color-bg-primary: var(--background-primary);
+  --color-bg-secondary: var(--background-secondary);
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-accent: var(--accent-primary);
+  --color-accent-hover: var(--accent-secondary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border-primary);
+  --color-verified: var(--success);
+  --color-warning: var(--error);
+
+  /* ==========================================================================
+     TYPOGRAPHY VARIABLES
+     ========================================================================== */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-title: 'Gloria Hallelujah', cursive;
+  --font-handwritten: 'Caveat', cursive;
+
+  /* ==========================================================================
+     SPACING SYSTEM
+     ========================================================================== */
+  --space-xs: 0.5rem;   /* 8px */
+  --space-sm: 1rem;     /* 16px */
+  --space-md: 1.5rem;   /* 24px */
+  --space-lg: 2.5rem;   /* 40px */
+  --space-xl: 4rem;     /* 64px */
+  --space-xxl: 6.5rem;  /* 104px */
+
+  /* ==========================================================================
+     BORDER RADII & SHADOWS
+     ========================================================================== */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 1px rgba(139, 92, 246, 0.1);
+  --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 10px rgba(139, 92, 246, 0.15);
+
+  /* ==========================================================================
+     ANIMATION & TRANSITIONS
+     ========================================================================== */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 0.4s var(--ease-out-expo);
+  --transition-fast: 0.2s var(--ease-out-expo);
 }
 
 @theme {
-  --color-background: var(--color-bg-primary);
-  --color-background-secondary: var(--color-bg-secondary);
-  --color-bg-primary: var(--color-bg-primary);
-  --color-bg-secondary: var(--color-bg-secondary);
-  --color-accent: var(--color-accent);
-  --color-accent-hover: var(--color-accent-hover);
-  --color-text-primary: var(--color-text-primary);
-  --color-text-secondary: var(--color-text-secondary);
-  --color-border: var(--color-border);
-  --color-verified: var(--color-verified);
-  --color-warning: var(--color-warning);
+  --color-background-primary: var(--background-primary);
+  --color-background-secondary: var(--background-secondary);
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-accent-primary: var(--accent-primary);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border-primary: var(--border-primary);
+  --color-border-active: var(--border-active);
 
-  --font-serif: var(--font-serif, "Source Serif 4", Georgia, serif);
-  --font-sans: var(--font-sans, "Inter", system-ui, sans-serif);
-  --font-mono: var(--font-mono, "IBM Plex Mono", monospace);
+  --color-background: var(--background-primary);
+  --color-bg-primary: var(--background-primary);
+  --color-bg-secondary: var(--background-secondary);
+  --color-accent: var(--accent-primary);
+  --color-accent-hover: var(--accent-secondary);
+  --color-border: var(--border-primary);
+  --color-verified: var(--success);
+  --color-warning: var(--error);
+
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-heading: 'Outfit', system-ui, sans-serif;
+  --font-title: 'Gloria Hallelujah', cursive;
+  --font-handwritten: 'Caveat', cursive;
 }
 
-@layer base {
-  body {
-    background-color: var(--color-bg-primary);
-    color: var(--color-text-primary);
-    font-family: var(--font-sans, "Inter", sans-serif);
-    font-size: 16px;
-    line-height: 1.5;
-    transition: background-color 0.2s ease, color 0.2s ease;
-    @apply antialiased selection:bg-accent/20 selection:text-accent;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    body {
-      transition: none;
-    }
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-serif, "Source Serif 4", serif);
-    color: var(--color-text-primary);
-    line-height: 1.2;
-    font-weight: 600;
-  }
-
-  h1 { font-size: 2.4375rem; } /* 39px */
-  h2 { font-size: 1.9375rem; }  /* 31px */
-  h3 { font-size: 1.5625rem; }  /* 25px */
-  h4 { font-size: 1.25rem; font-weight: 500; }    /* 20px */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-/* Accessibility Visible Focus Outline */
-*:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
-  border-radius: 6px;
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Stamp Badges */
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--background-primary);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Headings Default */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-top: 0;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-sm);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* Custom Text Highlight */
+::selection {
+  background: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+/* Focus outline for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+
+/* ==========================================================================
+   REUSABLE UTILITY CLASSES & COMPONENT PATTERNS
+   ========================================================================== */
+
+/* Container constraint */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: var(--space-md);
+  padding-right: var(--space-md);
+}
+
+/* Text Gradient Utilities */
+.text-gradient {
+  background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glassmorphism Card/Panel Utility */
+.glass-panel {
+  background: rgba(18, 9, 33, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: border-color var(--transition-smooth), transform var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+.glass-panel:hover {
+  border-color: var(--border-active);
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.1);
+}
+
+/* Tag / Badge Utility */
+.badge-tag {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  background: rgba(139, 92, 246, 0.08);
+  color: var(--accent-secondary);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  border-radius: var(--radius-sm);
+}
+
+/* Stamp Badges compatibility */
 .verification-stamp {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 600;
-  background-color: rgba(74, 124, 89, 0.12);
-  border: 1px solid var(--color-verified);
-  color: var(--color-verified);
+  background-color: rgba(52, 211, 153, 0.12);
+  border: 1px solid var(--success);
+  color: var(--success);
 }
 
 .threshold-lock-stamp {
@@ -100,29 +246,10 @@
   gap: 0.375rem;
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 600;
-  background-color: rgba(179, 73, 43, 0.12);
-  border: 1px solid var(--color-warning);
-  color: var(--color-warning);
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-secondary);
+  background-color: rgba(248, 113, 113, 0.12);
+  border: 1px solid var(--error);
+  color: var(--error);
 }

@@ -92,28 +92,28 @@ export default function ReviewCard({
   );
 
   return (
-    <div className="bg-background-secondary border border-border rounded-lg p-5 sm:p-6 space-y-4 shadow-[0_1px_3px_rgba(31,30,29,0.08)]">
+    <div className="glass-panel p-5 sm:p-6 space-y-4 transition-all">
       {/* Review Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-md bg-background border border-border flex items-center justify-center text-text-secondary">
+          <div className="w-9 h-9 rounded-lg bg-[var(--surface-primary)] border border-[var(--border-primary)] flex items-center justify-center text-[var(--accent-secondary)]">
             <User className="w-4 h-4" />
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono font-semibold text-xs text-text-primary">{review.anonymousProfile.publicHandle}</span>
+              <span className="font-mono font-semibold text-xs text-[var(--text-primary)]">{review.anonymousProfile.publicHandle}</span>
               {review.anonymousProfile.batchYear && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-background border border-border text-text-secondary font-medium">
+                <span className="badge-tag font-mono">
                   Class of {review.anonymousProfile.batchYear}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-1.5 mt-1">
               <span className="verification-stamp">
-                <ShieldCheck className="w-3.5 h-3.5 text-verified" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[var(--success)]" />
                 <span>Verified Student Review</span>
               </span>
-              <span className="text-[10px] text-text-secondary font-mono" suppressHydrationWarning>
+              <span className="text-[10px] text-[var(--text-muted)] font-mono" suppressHydrationWarning>
                 • {new Date(review.createdAt).toLocaleDateString()}
               </span>
             </div>
@@ -122,11 +122,11 @@ export default function ReviewCard({
 
         {/* Overall Scorecard Badge */}
         <div className="flex flex-col items-end shrink-0">
-          <div className="px-2.5 py-1 rounded-md bg-background border border-border font-mono font-bold text-xs text-accent flex items-center gap-1.5">
+          <div className="px-2.5 py-1 rounded-md bg-[var(--surface-primary)] border border-[var(--border-primary)] font-mono font-bold text-xs text-[var(--accent-secondary)] flex items-center gap-1.5 shadow-[0_0_10px_rgba(139,92,246,0.2)]">
             <span>{compositeScore.toFixed(1)}</span>
-            <span className="text-text-secondary text-[10px] font-normal">/ 5.0</span>
+            <span className="text-[var(--text-muted)] text-[10px] font-normal">/ 5.0</span>
           </div>
-          <span className="text-[10px] text-text-secondary font-mono mt-1">Audit Score</span>
+          <span className="text-[10px] text-[var(--text-muted)] font-mono mt-1">Audit Score</span>
         </div>
       </div>
 
